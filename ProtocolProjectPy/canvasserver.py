@@ -11,8 +11,8 @@ MAIN_PORT = 5000
 
 HOST = "0.0.0.0"
 
-CANVAS_X = 800
-CANVAS_Y = 600
+CANVAS_X = 0
+CANVAS_Y = 0
 
 HEARTBEAT_INTERVAL = 10
 
@@ -74,7 +74,7 @@ def recv_message(sock):
 # Register with Main Server
 # ============================================================
 
-def register_with_main(session, port):
+def register_with_main(session, port, canvasx, canvasy):
 
     sock = socket.socket(
         socket.AF_INET,
@@ -87,7 +87,9 @@ def register_with_main(session, port):
 
     message = prtcp.RegSession(
         session=session,
-        port=port
+        port=port,
+        canvas_x=canvasx,
+        canvas_y=canvasy
     )
 
     print_message(
@@ -268,9 +270,9 @@ def handle_client(sock, address):
 
                 if (
                     message.x < 0
-                    or message.x >= CANVAS_X
+                    or message.x > CANVAS_X
                     or message.y < 0
-                    or message.y >= CANVAS_Y
+                    or message.y > CANVAS_Y
                 ):
 
                     error = prtcp.AnsError(
@@ -431,24 +433,22 @@ def main():
 
         try:
 
-            session = int(
-                input(
-                    "Enter session number (1-10000): "
-                )
-            )
+            session = int(input("Enter session number (1-10000): "))
+            canvasx = int(input("Enter canvas size X (1-9999): "))
+            canvasy = int(input("Enter canvas size Y (1-9999): "))
 
-            if 1 <= session <= 10000:
+            if (1 <= session <= 10000) and (1 <= canvasx <= 9999) and (1 <= canvasy <= 9999):
+                global CANVAS_X
+                global CANVAS_Y
+                CANVAS_X = canvasx
+                CANVAS_Y = canvasy
                 break
 
-            print(
-                "Session must be between 1 and 10000."
-            )
+            print("Session setup input invalid.")
 
         except ValueError:
 
-            print(
-                "Please enter a number."
-            )
+            print("Please enter a number.")
 
     # --------------------------------------------------------
     # Create server socket
@@ -488,7 +488,7 @@ def main():
 
     print(
         f"[CANVAS] Canvas  : "
-        f"{CANVAS_X} x {CANVAS_Y}"
+        f"{canvasx} x {canvasy}"
     )
 
     # --------------------------------------------------------
@@ -497,7 +497,9 @@ def main():
 
     registration_socket = register_with_main(
         session,
-        actual_port
+        actual_port,
+        canvasx,
+        canvasy
     )
 
     if registration_socket is None:

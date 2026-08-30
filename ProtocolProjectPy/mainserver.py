@@ -72,6 +72,8 @@ def handle_canvas_registration(sock, address):
 
         session_id = message.session
         port = message.port
+        canvas_x = message.canvas_x
+        canvas_y = message.canvas_y
 
         with sessions_lock:
 
@@ -93,7 +95,9 @@ def handle_canvas_registration(sock, address):
 
             sessions[session_id] = {
                 "host": address[0],
-                "port": port
+                "port": port,
+                "canvas_x": canvas_x,
+                "canvas_y": canvas_y
             }
 
         response = prtcp.AckReg()
@@ -216,8 +220,8 @@ def handle_client(sock, address):
                     response = prtcp.AnsJoin(
                         session=session_id,
                         port=info["port"],
-                        canvas_x=800,
-                        canvas_y=600
+                        canvas_x=info["canvas_x"],
+                        canvas_y=info["canvas_y"]
                     )
 
             # ------------------------------------------------
@@ -233,8 +237,8 @@ def handle_client(sock, address):
                 response = prtcp.AnsJoin(
                     session=session_id,
                     port=info["port"],
-                    canvas_x=800,
-                    canvas_y=600
+                    canvas_x=info["canvas_x"],
+                    canvas_y=info["canvas_y"]
                 )
 
             else:
@@ -291,11 +295,6 @@ def main():
 
         sock, address = server.accept()
 
-        # First message determines whether this is
-        # a Canvas Server registration or a client request.
-        #
-        # For simplicity, inspect the first message here.
-
         try:
 
             data = recv_message(sock)
@@ -313,9 +312,6 @@ def main():
 
             # Canvas Server
             if isinstance(message, prtcp.RegSession):
-
-                # We already consumed the registration message.
-                # Handle registration using the parsed message.
 
                 def registration_thread():
                     handle_registration_with_first_message(
@@ -369,6 +365,8 @@ def handle_registration_with_first_message(
 
     port = message.port
     session_id = message.session
+    canvas_x = message.canvas_x
+    canvas_y = message.canvas_y
 
     try:
 
@@ -396,7 +394,9 @@ def handle_registration_with_first_message(
 
             sessions[session_id] = {
                 "host": address[0],
-                "port": port
+                "port": port,
+                "canvas_x": canvas_x,
+                "canvas_y": canvas_y
             }
 
         response = prtcp.AckReg()
@@ -415,6 +415,7 @@ def handle_registration_with_first_message(
         )
 
         # Keep registration connection alive.
+        
         while True:
 
             incoming = sock.recv(4096)
@@ -463,6 +464,8 @@ def handle_client_with_first_message(
 
         else:
 
+            # print("checkpoint 1")
+
             requested_session = message.session
 
             with sessions_lock:
@@ -484,20 +487,24 @@ def handle_client_with_first_message(
                         response = prtcp.AnsJoin(
                             session=session_id,
                             port=info["port"],
-                            canvas_x=800,
-                            canvas_y=600
+                            canvas_x=info["canvas_x"],
+                            canvas_y=info["canvas_y"]
                         )
 
                 elif requested_session in sessions:
 
-                    info = sessions[requested_session]
+                    print("checkpoint 2")
 
+                    info = sessions[requested_session]
+                    
                     response = prtcp.AnsJoin(
                         session=requested_session,
                         port=info["port"],
-                        canvas_x=800,
-                        canvas_y=600
+                        canvas_x=info["canvas_x"],
+                        canvas_y=info["canvas_y"]
                     )
+
+                    print("checkpoint 3")
 
                 else:
 
@@ -505,10 +512,14 @@ def handle_client_with_first_message(
                         error_code=0
                     )
 
+        print("checkpoint 4")
+
         print_message(
             "Main Server -> Client",
             response.encode()
         )
+
+        print("checkpoint 5")
 
         send_message(sock, response)
 

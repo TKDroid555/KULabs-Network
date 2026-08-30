@@ -146,6 +146,8 @@ class AnsLeave(Message):
 class RegSession(Message):
     session: int
     port: int
+    canvas_x: int
+    canvas_y: int
 
     type = MessageType.REGSESSION
 
@@ -289,6 +291,8 @@ def serialize(message: Message) -> bytes:
         
         lines.append(f"SESSION={message.session:05d}")
         lines.append(f"PORT={message.port:05d}")
+        lines.append(f"CANVASX={message.canvas_x:04d}")
+        lines.append(f"CANVASY={message.canvas_y:04d}")
 
     # Message with no payload
     #
@@ -530,13 +534,11 @@ def parse(data: bytes) -> Message:
         _check_exact_fields(
             fields,
             [
-                "ERRID",
                 "ERRCODE"
             ]
         )
 
         return AnsError(
-            _parse_int(fields, "ERRID"),
             _parse_int(fields, "ERRCODE")
         )
 
@@ -546,13 +548,17 @@ def parse(data: bytes) -> Message:
             fields,
             [
                 "SESSION",
-                "PORT"
+                "PORT",
+                "CANVASX",
+                "CANVASY"
             ]
         )
 
         return RegSession(
             _parse_int(fields, "SESSION"),
-            _parse_int(fields, "PORT")
+            _parse_int(fields, "PORT"),
+            _parse_int(fields, "CANVASX"),
+            _parse_int(fields, "CANVASY")
         )
     
     if message_type == MessageType.ACKREG:
