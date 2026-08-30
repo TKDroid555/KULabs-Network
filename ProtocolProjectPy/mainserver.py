@@ -185,7 +185,7 @@ def handle_client(sock, address):
 
         if not isinstance(message, prtcp.ReqJoin):
 
-            response = prtcp.AnsError(error_code=1) # ERRCODE=1 - Main only recieve REQJOIN, if not then error
+            response = prtcp.AnsError(error_code=1)
 
             print_message(
                 "Main Server -> Client",
@@ -209,7 +209,7 @@ def handle_client(sock, address):
 
                 if not sessions:
 
-                    response = prtcp.AnsError(error_code=0) # ERRCODE=0 - No session avaliable or client's requested session is not avaliable
+                    response = prtcp.AnsError(error_code=0)
 
                 else:
 
@@ -243,7 +243,7 @@ def handle_client(sock, address):
 
             else:
 
-                response = prtcp.AnsError(error_code=0) # ERRCODE=0 - No session avaliable or client's requested session is not avaliable
+                response = prtcp.AnsError(error_code=0)
 
         print_message(
             "Main Server -> Client",
@@ -415,7 +415,7 @@ def handle_registration_with_first_message(
         )
 
         # Keep registration connection alive.
-        
+
         while True:
 
             incoming = sock.recv(4096)

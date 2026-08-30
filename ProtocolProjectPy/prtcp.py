@@ -63,6 +63,10 @@ class MessageType(Enum):
     PONG = "PONG" # Pong back to session
 
     ANSERROR = "ANSERROR" # Comes with error message
+    # code 0 = No session avaliable or client's requested session is not avaliable
+    # code 1 = Bad request or invalid message
+    # code 2 = That session number is already registered
+    # code 3 = Full sessions
 
     REGSESSION = "REGSESSION" # Register session to main
     ACKREG = "ACKREG" # Main acknowledge registered session
