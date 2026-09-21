@@ -6,4 +6,4 @@
 
 ---
 
-### Subnet Homework เก็บอยู่ใน Folder "Assignemnts" นะครับ
+### เอกสารการบ้านเก็บอยู่ใน Folder "Assignemnts" นะครับ
